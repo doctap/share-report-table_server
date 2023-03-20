@@ -41,326 +41,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var dotenv_1 = __importDefault(require("dotenv"));
 var body_parser_1 = __importDefault(require("body-parser"));
 var cors_1 = __importDefault(require("cors"));
-var requests_db_1 = require("./db/requests-db");
 var helmet_1 = __importDefault(require("helmet"));
-var checkJwt_1 = require("./middleware/checkJwt");
-var manageFS_1 = require("./utils/manageFS");
-var upload_1 = __importDefault(require("./middleware/upload"));
-dotenv_1.default.config();
+var GetData_1 = require("./request/GetData");
 var app = (0, express_1.default)();
 var port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : 5000;
+var SECRET_TOKEN = process.env.SECRET_TOKEN;
 app.use(express_1.default.urlencoded({ extended: true }));
 var corsOptions = {
     credentials: true,
     optionsSuccessStatus: 200,
-    origin: ['https://some-reviews.onrender.com', 'http://localhost:5000'],
+    origin: ['http://localhost:3000'],
     methods: ['GET', 'POST', 'DELETE'],
 };
-app.use((0, helmet_1.default)({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'"],
-            styleSrc: ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],
-            imgSrc: ["*", "'self'", 'data:', 'https:'],
-            connectSrc: ["'self'", 'https://recommendations-app.eu.auth0.com/oauth/token'],
-            fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-            objectSrc: ["'self'"],
-            mediaSrc: ["'self'"],
-            frameSrc: ["'self'", "recommendations-app.eu.auth0.com"],
-        },
-    }
-}));
+app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)(corsOptions));
-app.use(express_1.default.static("public"));
 app.use(body_parser_1.default.json());
-app.post("/", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body, r;
+app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var page;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                body = req.body;
-                console.log('reviews'); // <==
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\tcoalesce((SELECT AVG(user_rating) FROM user_ratings WHERE review_id=reviews.id), '0') AS average_rating\n\t\tFROM Reviews ORDER BY date DESC, Id\n\t\tLIMIT ".concat(body.take, " OFFSET ").concat(body.skip, ";"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    r.body.forEach(function (it) {
-                        it.average_rating = parseFloat(it.average_rating).toFixed(1);
-                        it.image = (0, manageFS_1.convertBase64)("uploads/".concat(it.image));
-                    });
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.get("/comments:review_id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var reviewId, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                console.log('comments'); // <==
-                reviewId = req.params.review_id;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\t\t(SELECT first_name FROM Users WHERE id=Comments.user_id),\n\t\t\t(SELECT last_name FROM Users WHERE id=Comments.user_id)\n\t\tFROM Comments WHERE review_id = ".concat(parseInt(reviewId), ";"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.get("/review/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var reviewId, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                console.log('1 review'); // <==
-                reviewId = req.params.id;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\tcoalesce((SELECT AVG(user_rating) FROM user_ratings WHERE review_id=reviews.id), '0') AS average_rating\n\t\tFROM Reviews WHERE id=".concat(reviewId, ";"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    r.body.forEach(function (it) {
-                        it.average_rating = parseFloat(it.average_rating).toFixed(1);
-                        it.image = (0, manageFS_1.convertBase64)("uploads/".concat(it.image));
-                    });
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post("/protected_Review", checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = req.body;
-                console.log('1 protected_Review'); // <==
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\tcoalesce((SELECT AVG(user_rating) FROM user_ratings WHERE review_id=reviews.id), '0') AS average_rating,\n\t\tcoalesce((SELECT review_like FROM user_ratings WHERE user_id = '".concat(body.sub, "' AND review_id = Reviews.id), '0') AS user_likes_it,\n\t\tcoalesce((SELECT user_rating FROM user_ratings WHERE user_id = '").concat(body.sub, "' AND review_id = Reviews.id), '0') AS user_rating\n\t\tFROM Reviews WHERE id=").concat(body.review_id, " ;"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    r.body.forEach(function (it) {
-                        it.average_rating = parseFloat(it.average_rating).toFixed(1);
-                        it.image = (0, manageFS_1.convertBase64)("uploads/".concat(it.image));
-                    });
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post("/protectedReviews", checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = req.body;
-                console.log('protectedReviews'); // <==
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\tcoalesce((SELECT AVG(user_rating) FROM user_ratings WHERE review_id=reviews.id), '0') AS average_rating,\n\t\tcoalesce((SELECT review_like FROM user_ratings WHERE user_id = '".concat(body === null || body === void 0 ? void 0 : body.sub, "' AND review_id = Reviews.id), '0') AS user_likes_it,\n\t\tcoalesce((SELECT user_rating FROM user_ratings WHERE user_id = '").concat(body === null || body === void 0 ? void 0 : body.sub, "' AND review_id = Reviews.id), '0') AS user_rating\n\t\tFROM Reviews ORDER BY date DESC, Id\n\t\tLIMIT ").concat(body.take, " OFFSET ").concat(body.skip, ";"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    r.body.forEach(function (it) {
-                        it.average_rating = parseFloat(it.average_rating).toFixed(1);
-                        it.image = (0, manageFS_1.convertBase64)("uploads/".concat(it.image));
-                    });
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post("/profilePage", checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = req.body;
-                console.log('profilePage'); // <==
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT *,\n\t\tcoalesce((SELECT AVG(user_rating) FROM user_ratings WHERE review_id=reviews.id), '0') AS average_rating,\n\t\tcoalesce((SELECT review_like FROM user_ratings WHERE user_id = '".concat(body.sub, "' AND review_id = Reviews.id), '0') AS user_likes_it,\n\t\tcoalesce((SELECT user_rating FROM user_ratings WHERE user_id = '").concat(body.sub, "' AND review_id = Reviews.id), '0') AS user_rating\n\t\tFROM Reviews WHERE user_id = '").concat(body.sub, "' ORDER BY date DESC, Id\n\t\tLIMIT ").concat(body.take, " OFFSET ").concat(body.skip, ";"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    r.body.forEach(function (it) {
-                        it.average_rating = parseFloat(it.average_rating).toFixed(1);
-                        it.image = (0, manageFS_1.convertBase64)("uploads/".concat(it.image));
-                    });
-                    res.setHeader("Content-Type", "application/json").status(200).json(r.body);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post("/createReview", upload_1.default.single('file'), function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body, file, r;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = JSON.parse(req.body.reviewData);
-                file = req.file;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("INSERT INTO reviews(text, title, name_work, type, tags, image, author_rating, likes, user_id, date)\n\t\tVALUES ('".concat(body.text, "', '").concat(body.title, "', '").concat(body.name_work, "', '").concat(body.type, "', '").concat(body.tags, "', '").concat(file === null || file === void 0 ? void 0 : file.filename, "', ").concat(body.author_rating, ", 0, '").concat(body.sub, "', '").concat(body.date, "');"))];
-            case 1:
-                r = _a.sent();
-                if (r.error) {
-                    res.sendStatus(501);
-                }
-                else {
-                    res.sendStatus(204);
-                }
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post("/registerUser", checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var user;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                user = req.body;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT count(id) as count FROM users WHERE id='".concat(user.sub, "';")).then(function (r) { return __awaiter(void 0, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    if (!(r.body[0].count === '0')) return [3 /*break*/, 2];
-                                    return [4 /*yield*/, (0, requests_db_1.sqlRequest)("INSERT INTO Users(first_name, last_name, id)\n\t\t\t\tVALUES('".concat(user === null || user === void 0 ? void 0 : user.given_name, "', '").concat(user === null || user === void 0 ? void 0 : user.family_name, "', '").concat(user === null || user === void 0 ? void 0 : user.sub, "');")).then(function () { return __awaiter(void 0, void 0, void 0, function () {
-                                            return __generator(this, function (_a) {
-                                                switch (_a.label) {
-                                                    case 0: return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT count(id) as result FROM users WHERE id='".concat(user.sub, "';")).then(function (q) {
-                                                            res.sendStatus(204);
-                                                        })];
-                                                    case 1:
-                                                        _a.sent();
-                                                        return [2 /*return*/];
-                                                }
-                                            });
-                                        }); })];
-                                case 1:
-                                    _a.sent();
-                                    return [3 /*break*/, 3];
-                                case 2:
-                                    if (r.body[0].count !== '0') {
-                                        res.sendStatus(204);
-                                    }
-                                    _a.label = 3;
-                                case 3: return [2 /*return*/];
-                            }
-                        });
-                    }); })];
+                page = Number(req.query.page);
+                return [4 /*yield*/, (0, GetData_1.getStocks)(page)
+                        .then(function (response) {
+                        res.send(response);
+                    }).catch(function (er) {
+                        res.sendStatus(501);
+                    })];
             case 1:
                 _a.sent();
                 return [2 /*return*/];
         }
     });
 }); });
-app.post('/likeReview', checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = req.body;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT count(user_id) as count FROM user_ratings WHERE user_id='".concat(body === null || body === void 0 ? void 0 : body.sub, "' AND review_id= ").concat(body.review_id, ";")).then(function (c) { return __awaiter(void 0, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    if (!(c.body[0].count !== '0')) return [3 /*break*/, 2];
-                                    return [4 /*yield*/, (0, requests_db_1.sqlRequest)("UPDATE user_ratings\n\t\t\t\tSET review_like = ".concat(body.user_likes_it ? 'true' : 'false', "\n\t\t\t\tWHERE review_id = ").concat(body.review_id, " AND user_id = '").concat(body === null || body === void 0 ? void 0 : body.sub, "';\n\t\t\t\t")).then(function () { return res.sendStatus(204); }).catch(function () { return res.sendStatus(501); })];
-                                case 1:
-                                    _a.sent();
-                                    return [3 /*break*/, 4];
-                                case 2:
-                                    if (!(c.body[0].count === '0')) return [3 /*break*/, 4];
-                                    return [4 /*yield*/, (0, requests_db_1.sqlRequest)("INSERT INTO user_ratings (user_id, review_id, review_like)\n\t\t\t\tVALUES ('".concat(body.sub, "', ").concat(body.review_id, ", ").concat(body.user_likes_it ? 'true' : 'false', ");\n\t\t\t\t")).then(function () { return res.sendStatus(204); }).catch(function () { return res.sendStatus(501); })];
-                                case 3:
-                                    _a.sent();
-                                    _a.label = 4;
-                                case 4: return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            case 1:
-                _a.sent();
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.post('/giveRating', checkJwt_1.checkJwt, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                body = req.body;
-                return [4 /*yield*/, (0, requests_db_1.sqlRequest)("SELECT count(user_id) as count FROM user_ratings WHERE user_id='".concat(body === null || body === void 0 ? void 0 : body.sub, "' AND review_id= ").concat(body.review_id, ";")).then(function (c) { return __awaiter(void 0, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    if (!(c.body[0].count !== '0')) return [3 /*break*/, 2];
-                                    return [4 /*yield*/, (0, requests_db_1.sqlRequest)("UPDATE user_ratings\n\t\t\t\tSET user_rating = ".concat(body.user_rating, "\n\t\t\t\tWHERE review_id = ").concat(body.review_id, " AND user_id = '").concat(body === null || body === void 0 ? void 0 : body.sub, "';\n\t\t\t\t")).then(function () { return res.sendStatus(204); }).catch(function () { return res.sendStatus(501); })];
-                                case 1:
-                                    _a.sent();
-                                    return [3 /*break*/, 4];
-                                case 2:
-                                    if (!(c.body[0].count === '0')) return [3 /*break*/, 4];
-                                    return [4 /*yield*/, (0, requests_db_1.sqlRequest)("INSERT INTO user_ratings (user_id, review_id, user_rating)\n\t\t\t\tVALUES ('".concat(body.sub, "', ").concat(body.review_id, ", ").concat(body.user_rating, ");\n\t\t\t\t")).then(function () { return res.sendStatus(204); }).catch(function () { return res.sendStatus(501); })];
-                                case 3:
-                                    _a.sent();
-                                    _a.label = 4;
-                                case 4: return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            case 1:
-                _a.sent();
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.get("/confidential", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        console.log("send client policy confidential");
-        res.setHeader("Content-Type", "application/json").status(200).json([{ body: 'policy confidential' }]);
-        return [2 /*return*/];
-    });
-}); });
-app.delete('/user-deletion', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        console.log("DELETE Request Called for /user-deletion endpoint");
-        res.send("DELETE Request Called");
-        return [2 /*return*/];
-    });
-}); });
-app.use('*', function (req, res) {
-    res.status(501).json({ message: 'Only api endpoint available' });
-});
 app.listen(port, function () {
     console.log("\u26A1\uFE0F[server]: Server is running at https://localhost:".concat(port, " \uD83D\uDE80"));
-});
-app.listen(port, function () {
-    console.log("\u26A1\uFE0F[server]: Server is qwertat https://localhost:".concat(port, " \uD83D\uDE80"));
 });
 //# sourceMappingURL=server.js.map

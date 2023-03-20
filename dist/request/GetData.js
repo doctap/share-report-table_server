@@ -35,52 +35,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sqlRequest = void 0;
-var pg_1 = require("pg");
-/**
- * NODE_ENV variable installed in package.json "scripts"
- */
-var config = ((_a = process.env.NODE_ENV) === null || _a === void 0 ? void 0 : _a.trim()) === 'development'
-    ? {
-        user: "toor",
-        password: "toor",
-        host: "localhost",
-    }
-    : {
-        database: 'root_m3iz',
-        user: "root",
-        password: "fhQJLApGCFbsHb0AXhJ8OasEKVI2aJgn",
-        host: "dpg-cesjbug2i3mh51uqttf0-a",
-    };
-var client = new pg_1.Client(config);
-function sqlRequest(sql) {
-    return __awaiter(this, void 0, void 0, function () {
-        var r;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    r = { body: [], error: false };
-                    return [4 /*yield*/, client
-                            .query(sql)
-                            .then(function (p) { return r.body = p.rows; })
-                            .catch(function (e) {
-                            r.error = true;
-                            throw new Error(e);
-                        })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/, r];
-            }
-        });
+exports.getStocks = void 0;
+var axios_1 = __importDefault(require("axios"));
+var dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+var SECRET_TOKEN = process.env.SECRET_TOKEN;
+var getStocks = function (page) { return __awaiter(void 0, void 0, void 0, function () {
+    var sliceEnd, response, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                sliceEnd = Math.ceil(page) * 10;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, axios_1.default.get("https://cloud.iexapis.com/stable/tops?token=".concat(SECRET_TOKEN))];
+            case 2:
+                response = _a.sent();
+                return [2 /*return*/, {
+                        stocks: response.data.slice(sliceEnd - 10, sliceEnd),
+                        totalItemCount: response.data.length
+                    }];
+            case 3:
+                error_1 = _a.sent();
+                throw error_1;
+            case 4: return [2 /*return*/];
+        }
     });
-}
-exports.sqlRequest = sqlRequest;
-(function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
-    switch (_a.label) {
-        case 0: return [4 /*yield*/, client.connect().catch(function (e) { return console.error(e); })];
-        case 1: return [2 /*return*/, _a.sent()];
-    }
-}); }); })();
-//# sourceMappingURL=requests-db.js.map
+}); };
+exports.getStocks = getStocks;
+//# sourceMappingURL=GetData.js.map

@@ -12,3 +12,8 @@ export interface IStock {
   symbol: string
   volume: number
 }
+
+export interface IStockResponse {
+  stocks: IStock[]
+  totalItemCount: number
+}

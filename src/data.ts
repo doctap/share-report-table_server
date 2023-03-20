@@ -1,6 +1,6 @@
 import { IStock } from "./types/data-contracts";
 
-export const DB: IStock[] = [
+export const data: IStock[] = [
   {
     symbol: 'BOAC+',
     sector: 'n/a',
