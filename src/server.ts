@@ -29,8 +29,8 @@ app.get("/", async (req: Request, res) => {
 	await getStocks(page)
 		.then(response => {
 			res.send(response)
-	}).catch((er) => {
-		res.sendStatus(501)
+	}).catch(error => {
+			res.sendStatus(error.response.status).send(error.response.statusText)
 	})
 });
 

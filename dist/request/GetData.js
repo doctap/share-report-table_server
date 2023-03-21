@@ -45,21 +45,32 @@ var dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 var SECRET_TOKEN = process.env.SECRET_TOKEN;
 var getStocks = function (page) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceEnd, response, error_1;
+    var requiredCount, response, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                sliceEnd = Math.ceil(page) * 10;
+                requiredCount = Math.ceil(page) * 10;
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, axios_1.default.get("https://cloud.iexapis.com/stable/tops?token=".concat(SECRET_TOKEN))];
             case 2:
                 response = _a.sent();
-                return [2 /*return*/, {
-                        stocks: response.data.slice(sliceEnd - 10, sliceEnd),
-                        totalItemCount: response.data.length
-                    }];
+                if (response.data.length - (requiredCount + 10)) {
+                    return [2 /*return*/, {
+                            stocks: response.data.slice(requiredCount - 10, requiredCount),
+                            totalItemCount: response.data.length
+                        }];
+                }
+                else {
+                    throw {
+                        response: {
+                            statusText: 'Page Not Found',
+                            status: 404
+                        }
+                    };
+                }
+                return [3 /*break*/, 4];
             case 3:
                 error_1 = _a.sent();
                 throw error_1;

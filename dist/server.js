@@ -67,8 +67,8 @@ app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, func
                 return [4 /*yield*/, (0, GetData_1.getStocks)(page)
                         .then(function (response) {
                         res.send(response);
-                    }).catch(function (er) {
-                        res.sendStatus(501);
+                    }).catch(function (error) {
+                        res.sendStatus(error.response.status).send(error.response.statusText);
                     })];
             case 1:
                 _a.sent();

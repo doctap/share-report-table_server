@@ -7,14 +7,24 @@ dotenv.config();
 const SECRET_TOKEN = process.env.SECRET_TOKEN;
 
 export const getStocks = async (page: number) => {
-  const sliceEnd = Math.ceil(page) * 10
+  const requiredCount = Math.ceil(page) * 10
 
   try {
     const response = await axios.get(`https://cloud.iexapis.com/stable/tops?token=${SECRET_TOKEN}`);
-    return {
-      stocks: response.data.slice(sliceEnd - 10, sliceEnd),
-      totalItemCount: response.data.length
-    }    
+
+    if (response.data.length - (requiredCount + 10)) {
+      return {
+        stocks: response.data.slice(requiredCount - 10, requiredCount),
+        totalItemCount: response.data.length
+      }
+    } else {
+      throw {
+        response: {
+          statusText: 'Page Not Found',
+          status: 404
+        }
+      }
+    }
   } catch (error) {
     throw error
   }
