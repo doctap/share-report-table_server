@@ -30,7 +30,7 @@ app.get("/", async (req: Request, res) => {
 		.then(response => {
 			res.send(response)
 	}).catch(error => {
-			res.sendStatus(error.response.status).send(error.response.statusText)
+			res.sendStatus(502)
 	})
 });
 

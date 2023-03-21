@@ -12,21 +12,11 @@ export const getStocks = async (page: number) => {
   try {
     const response = await axios.get(`https://cloud.iexapis.com/stable/tops?token=${SECRET_TOKEN}`);
 
-    if (response.data.length - (requiredCount + 10)) {
       return {
         stocks: response.data.slice(requiredCount - 10, requiredCount),
         totalItemCount: response.data.length
       }
-    } else {
-      throw {
-        response: {
-          statusText: 'Page Not Found',
-          status: 404
-        }
-      }
-    }
   } catch (error) {
     throw error
   }
-
 }

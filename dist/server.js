@@ -68,7 +68,7 @@ app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, func
                         .then(function (response) {
                         res.send(response);
                     }).catch(function (error) {
-                        res.sendStatus(error.response.status).send(error.response.statusText);
+                        res.sendStatus(502);
                     })];
             case 1:
                 _a.sent();

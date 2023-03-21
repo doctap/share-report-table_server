@@ -56,21 +56,10 @@ var getStocks = function (page) { return __awaiter(void 0, void 0, void 0, funct
                 return [4 /*yield*/, axios_1.default.get("https://cloud.iexapis.com/stable/tops?token=".concat(SECRET_TOKEN))];
             case 2:
                 response = _a.sent();
-                if (response.data.length - (requiredCount + 10)) {
-                    return [2 /*return*/, {
-                            stocks: response.data.slice(requiredCount - 10, requiredCount),
-                            totalItemCount: response.data.length
-                        }];
-                }
-                else {
-                    throw {
-                        response: {
-                            statusText: 'Page Not Found',
-                            status: 404
-                        }
-                    };
-                }
-                return [3 /*break*/, 4];
+                return [2 /*return*/, {
+                        stocks: response.data.slice(requiredCount - 10, requiredCount),
+                        totalItemCount: response.data.length
+                    }];
             case 3:
                 error_1 = _a.sent();
                 throw error_1;
