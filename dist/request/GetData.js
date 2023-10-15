@@ -40,31 +40,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStocks = void 0;
-var axios_1 = __importDefault(require("axios"));
 var dotenv_1 = __importDefault(require("dotenv"));
+var data_1 = require("../data");
 dotenv_1.default.config();
 var SECRET_TOKEN = process.env.SECRET_TOKEN;
 var getStocks = function (page) { return __awaiter(void 0, void 0, void 0, function () {
-    var requiredCount, response, error_1;
+    var requiredCount, psevdo;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                requiredCount = Math.ceil(page) * 10;
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, axios_1.default.get("https://cloud.iexapis.com/stable/tops?token=".concat(SECRET_TOKEN))];
-            case 2:
-                response = _a.sent();
-                return [2 /*return*/, {
-                        stocks: response.data.slice(requiredCount - 10, requiredCount),
-                        totalItemCount: response.data.length
-                    }];
-            case 3:
-                error_1 = _a.sent();
-                throw error_1;
-            case 4: return [2 /*return*/];
+        requiredCount = Math.ceil(page) * 10;
+        try {
+            psevdo = data_1.testData.slice(requiredCount - 10, requiredCount);
+            return [2 /*return*/, {
+                    stocks: psevdo,
+                    // stocks: response.data.slice(requiredCount - 10, requiredCount),
+                    // totalItemCount: response.data.length
+                    totalItemCount: data_1.testData.length
+                }];
         }
+        catch (error) {
+            throw error;
+        }
+        return [2 /*return*/];
     });
 }); };
 exports.getStocks = getStocks;

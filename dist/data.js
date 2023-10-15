@@ -1,6 +1,83 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.data = void 0;
+exports.data = exports.testData = void 0;
+exports.testData = [
+    {
+        symbol: 'BOAC+',
+        sector: 'n/a',
+        securityType: 'n/a',
+        bidPrice: 0,
+        bidSize: 0,
+        askPrice: 0,
+        askSize: 0,
+        lastUpdated: 1679059800000,
+        lastSalePrice: 0,
+        lastSaleSize: 0,
+        lastSaleTime: 0,
+        volume: 0,
+        test: 'Ha ha'
+    },
+    {
+        symbol: 'LVTX',
+        sector: 'n/a',
+        securityType: 'n/a',
+        bidPrice: 1.5,
+        bidSize: 100,
+        askPrice: 1.81,
+        askSize: 100,
+        lastUpdated: 1679070812465,
+        lastSalePrice: 0,
+        lastSaleSize: 0,
+        lastSaleTime: 0,
+        volume: 0,
+        test: 'Ha ha'
+    },
+    {
+        symbol: 'WIA',
+        sector: 'miscellaneous',
+        securityType: 'cef',
+        bidPrice: 8.64,
+        bidSize: 100,
+        askPrice: 0,
+        askSize: 0,
+        lastUpdated: 1679072587759,
+        lastSalePrice: 0,
+        lastSaleSize: 0,
+        lastSaleTime: 0,
+        volume: 0,
+        test: 'Ha ha'
+    },
+    {
+        symbol: 'PCG-D',
+        sector: 'utilities',
+        securityType: 'ps',
+        bidPrice: 0,
+        bidSize: 0,
+        askPrice: 0,
+        askSize: 0,
+        lastUpdated: 1679059800000,
+        lastSalePrice: 0,
+        lastSaleSize: 0,
+        lastSaleTime: 0,
+        volume: 0,
+        test: 'Ha ha'
+    },
+    {
+        symbol: 'CVLG',
+        sector: 'transportation',
+        securityType: 'cs',
+        bidPrice: 33.3,
+        bidSize: 200,
+        askPrice: 33.57,
+        askSize: 100,
+        lastUpdated: 1679072635921,
+        lastSalePrice: 33.66,
+        lastSaleSize: 90,
+        lastSaleTime: 1679071475832,
+        volume: 1255,
+        test: 'Ha ha'
+    },
+];
 exports.data = [
     {
         symbol: 'BOAC+',
